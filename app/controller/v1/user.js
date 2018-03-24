@@ -3,14 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const egg_1 = require("egg");
 const reply_1 = require("../../const/reply");
 class SigninController extends egg_1.Controller {
+    async test() {
+        const findResult = await this.ctx.service.user.getReviewUser("13269526666");
+    }
     async create() {
         const Joi = this.app.Joi;
         const model = this.ctx.model;
         //    const newUser = {
         //     userId: Joi.string().required(),
         //     password: Joi.string().min(6).required(),
-        //     level: Joi.string().required(), //TODO  验证
         //     basicSalary: Joi.number().required(),
+        //     roleName: Joi.string().required(),
         //     userName: Joi.string().required(),
         //     gender: Joi.number().required(),
         //     age: Joi.number().required(),
@@ -29,8 +32,8 @@ class SigninController extends egg_1.Controller {
         const newUserInfo = {
             userId: reqBody.userId,
             password: reqBody.password,
-            level: reqBody.level,
             basicSalary: reqBody.basicSalary,
+            roleName: reqBody.roleName,
             parentId: reqBody.parentId || "",
             userName: reqBody.userName,
             gender: reqBody.gender,
@@ -41,14 +44,7 @@ class SigninController extends egg_1.Controller {
             wechatId: reqBody.wechatId,
             teams: reqBody.teams
         };
-        const userInfo = await this.ctx.service.user.createUser(newUserInfo);
-        if (!userInfo) {
-            this.ctx.body = reply_1.default.err('添加失败!');
-            return;
-        }
-        //return reply.success(userInfo);
-        let result = {};
-        result = reply_1.default.success({});
+        const result = await this.ctx.service.user.createUser(newUserInfo);
         this.ctx.body = result;
     }
     async signin() {
@@ -59,15 +55,7 @@ class SigninController extends egg_1.Controller {
             userId: Joi.string().required(),
             password: Joi.string().required()
         }), this.ctx.request.body);
-        const userInfo = await this.ctx.service.user.findUserInfoByUserIdAndPwd(reqBody.userId, reqBody.password);
-        if (!userInfo) {
-            this.ctx.body = reply_1.default.err('没有此用户');
-            return;
-        }
-        console.log('signin userInfo ==', userInfo);
-        this.ctx.session.user = { userId: userInfo.userId, role: userInfo.role }; //isAdmin: true ,isReview: 0  根据userInfo.role 判断
-        let result = {};
-        result = reply_1.default.success(userInfo);
+        const result = await this.ctx.service.user.findUserInfoByUserIdAndPwd(reqBody.userId, reqBody.password);
         this.ctx.body = result;
     }
     async searchByNameOrId() {
